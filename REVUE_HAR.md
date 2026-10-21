@@ -50,7 +50,7 @@ L'ordre est choisi pour **éviter de refaire le travail** : d'abord les correcti
 ### Étape 2 : remettre le notebook dans un état cohérent (~5 min)
 
 - [x] **Kernel → Restart Kernel and Run All Cells.** La cellule §3.1 (`lr_pipeline`) a le numéro d'exécution `[29]`, alors que l'évaluation sur le test (§6) a `[25]`. Le score de test vient donc peut-être d'une **ancienne définition** de `lr_pipeline`.
-- [ ] **Sauvegarder et commiter** ce point de départ propre.
+- [x] **Sauvegarder et commiter** ce point de départ propre.
 
 ### Étape 3 : factoriser le code (critère « Code readability », ~30 min)
 
@@ -78,7 +78,7 @@ L'ordre est choisi pour **éviter de refaire le travail** : d'abord les correcti
 
   Pour la RF, appeler avec `n_jobs=1` (la RF est déjà parallélisée en interne, comme dans le code actuel).
 - [ ] **Construire le tableau récapitulatif de §5 à partir de `results`.** Cela supprime le double tableau (§3.5 et §5) et le `"≈102"` codé en dur. Pour la dimension réelle de la PCA, utiliser `pca_95.n_components_`.
-- [ ] **Afficher l'écart-type dans tous les tableaux** (il manque dans le tableau LR + SelectKBest de §4.1).
+- [x] **Afficher l'écart-type dans tous les tableaux** (il manque dans le tableau LR + SelectKBest de §4.1). Fait avec `ddof=1` (division par k − 1), convention annoncée en §3.1.
 - [ ] **Regrouper les imports sklearn** dans la première cellule de code.
 - [ ] **Code mort** : `X_train_pca` et `X_test_pca` (§2.5) ne sont utilisés par aucun modèle. Soit les supprimer, soit garder seulement l'affichage des dimensions en précisant que les pipelines refont la PCA dans chaque pli. Transformer le jeu de test en §2 sème le doute sur une fuite de données.
 
@@ -131,7 +131,7 @@ Aucun hyperparamètre n'est réglé. Premier test : le gain est faible, donc le 
 
 - [ ] **L'écart-type entre plis est d'environ 4 pt** : la LR va de 0,88 à 0,98 selon le pli. L'écart LR/SVM (1,1 pt) est donc plus petit que la variabilité. Nuancer « Logistic Regression achieved the highest… » : les modèles sont proches.
 - [ ] **Comparer les modèles pli par pli** : ils voient les mêmes sujets à chaque pli, donc regarder l'écart dans chaque pli est plus solide que de comparer des moyennes.
-- [ ] **Graphique de §5** : ajouter des barres d'erreur (écart-type), et remplacer `plt.ylim(0, 1)` par une échelle qui montre les différences, par exemple `(0.8, 1)`, en le signalant.
+- [ ] **Graphique de §5** : ajouter des barres d'erreur (écart-type), et remplacer `plt.ylim(0, 1)` par une échelle qui montre les différences, par exemple `(0.8, 1)`, en le signalant. *Barres d'erreur faites ; reste l'échelle.*
 
 ### Étape 8 : analyser les erreurs (critère « Evaluation », ~20 min)
 
