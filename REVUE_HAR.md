@@ -77,16 +77,19 @@ L'ordre est choisi pour **éviter de refaire le travail** : d'abord les correcti
   ```
 
   Pour la RF, appeler avec `n_jobs=1` (la RF est déjà parallélisée en interne, comme dans le code actuel).
-- [ ] **Construire le tableau récapitulatif de §5 à partir de `results`.** Cela supprime le double tableau (§3.5 et §5) et le `"≈102"` codé en dur. Pour la dimension réelle de la PCA, passer `return_estimator=True` à `cross_validate` et lire `est["pca"].n_components_` dans chaque pli : la PCA y garde 100 ou 101 composantes selon le pli, pas 102 (ce chiffre vient de la PCA d'exploration de §2.4, ajustée sur tout le train).
+- [ ] **Construire le tableau récapitulatif de §5 à partir de `results`.** Cela supprime le double tableau (§3.5 et §5) et le `"≈102"` codé en dur. Pour la dimension réelle de la PCA, passer `return_estimator=True` à `cross_validate` et lire `est["pca"].n_components_` dans chaque pli : la PCA y garde 101 ou 102 composantes selon le pli, pas 103 (ce chiffre vient de la PCA d'exploration de §2.4, ajustée sur tout le train ; avant la suppression des 21 colonnes dupliquées, c'était 100 ou 101 contre 102).
 - [x] **Afficher l'écart-type dans tous les tableaux** (il manque dans le tableau LR + SelectKBest de §4.1). Fait avec `ddof=1` (division par k − 1), convention annoncée en §3.1.
 - [ ] **Regrouper les imports sklearn** dans la première cellule de code.
 - [x] **Code mort** : `X_train_pca` et `X_test_pca` (§2.5) ne sont utilisés par aucun modèle. Soit les supprimer, soit garder seulement l'affichage des dimensions en précisant que les pipelines refont la PCA dans chaque pli. Transformer le jeu de test en §2 sème le doute sur une fuite de données. *Fait : §2.5 supprimée (code et texte), `X_test_scaled` retiré de §2.2, et un paragraphe à la fin de §2.4 explique que cette PCA sert seulement à l'exploration et que les pipelines refont scaler + PCA dans chaque pli. Le jeu de test n'apparaît plus qu'en §6.*
 
 ### Étape 4 : compléter le prétraitement (critère « Preprocessing », ~30 min)
 
-- [ ] **21 colonnes strictement identiques** à d'autres (par exemple `tGravityAccMag-*` = `tBodyAccMag-*`). `train_df.duplicated()` ne teste que les lignes, il faut aussi `X_train.T.duplicated()`. **À décider en groupe :**
+- [x] **21 colonnes strictement identiques** à d'autres (par exemple `tGravityAccMag-*` = `tBodyAccMag-*`). `train_df.duplicated()` ne teste que les lignes, il faut aussi `X_train.T.duplicated()`. **À décider en groupe :**
   - soit les supprimer (recommandé), mais alors tous les « 561 » du texte deviennent **540** ;
   - soit les signaler et justifier pourquoi on les garde.
+
+  *Fait (option « supprimer ») : en §2, après le test des variables constantes, une cellule liste les 21 copies et la variable qu'elles recopient, puis une autre les retire de `X_train` et de `X_test` (colonnes repérées sur le train seulement). Deux familles : les 13 `tGravityAccMag-*` = `tBodyAccMag-*`, et `-sma()` = `-mean()` pour les 8 autres signaux de magnitude (une magnitude est positive, donc la moyenne de sa valeur absolue est sa moyenne). Le texte justifie la suppression (poids doublé dans la PCA, les distances du SVM et le tirage des variables de la RF ; deux places sur k prises dans SelectKBest) et explique pourquoi la faire avant la validation croisée ne crée pas de fuite. Tous les « 561 » qui désignent l'entrée des modèles sont passés à 540, et 64,3 % à 63,0 %. Les « 561 » qui décrivent le dataset (intro, `info()`, Gao et al.) restent. Chiffres de §2 mis à jour : 1 746 paires corrélées sur 145 530 (1,20 %), 103 composantes sur 540 (80,9 %). Le code de §5 lit la dimension avec `X_train.shape[1]`.*
+  - *À dire à l'oral : sur les 561 variables, SelectKBest aurait mis 6 copies dans son top 50, 11 dans le top 100 et 16 dans le top 200.*
 - [ ] **84 noms de colonnes `bandsEnergy`** sont dupliqués dans la source, et pandas leur ajoute `.1`/`.2`. Le mentionner.
 - [ ] **§2.2** : préciser que les auteurs du dataset ont déjà normalisé les variables dans **[-1, 1]**. La standardisation reste utile (moyennes et variances différentes), mais la phrase actuelle est vague.
 - [ ] **Exploration par sujet** : 21 sujets en entraînement, 9 en test, sans recouvrement. Le découpage officiel est déjà fait par sujet, ce qui renforce l'argument de la validation croisée groupée.
@@ -184,6 +187,6 @@ Aucun hyperparamètre n'est réglé. Premier test : le gain est faible, donc le 
   | LR + KBest(200) F1 macro | 92,23 % | 92,21 % | §4.1 |
   | Baisse d'accuracy LR avec KBest | « 1 pt » | 1,05 pt | §4.1, §6 Trade-off, SOTA |
 
-  Ces valeurs changeront de toute façon après les étapes 3 à 6. **Le mieux** est de faire afficher les phrases clés par le code (f-strings avec `:.2%`), ce qui évite ce décalage. Les scores de la LR varient aussi d'environ ±0,1 pt selon la machine (la relance donne 93,45 % en validation croisée et 95,45 % sur le test).
+  La colonne « Affiché par le code » date d'avant la suppression des 21 colonnes dupliquées (étape 4). Avec 540 variables, la relance donne par exemple 93,52 % pour la LR en validation croisée, 92,08 % pour la LR + PCA et 95,42 % sur le test. Ces valeurs changeront de toute façon après les étapes 3 à 6. **Le mieux** est de faire afficher les phrases clés par le code (f-strings avec `:.2%`), ce qui évite ce décalage. Les scores de la LR varient aussi d'environ ±0,1 pt selon la machine (la relance donne 93,45 % en validation croisée et 95,45 % sur le test).
 - [ ] **Vérifier la taille** du notebook (< 10 Mo) et que les noms de tous les membres y sont.
 - [ ] **Préparer les slides en PDF** (recommandées par la consigne) à partir des graphiques finaux.
