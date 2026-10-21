@@ -36,7 +36,7 @@ Cells share global state and must run in order:
 - Every experiment is a `Pipeline` (StandardScaler / PCA / SelectKBest inside it) scored with `cross_validate(..., groups=groups, cv=cv, scoring=["accuracy", "f1_macro"])`. Results go to `{lr,svm,rf}_scores` and `{lr,svm,rf}_pca_scores` (dicts) and `{lr,svm,rf}_fs_df` (DataFrames for k = 50/100/200).
 - Section 5 aggregates them through the `model_results` dict into `comparison_df` (PCA dimension hard-coded as `"≈102"`); a new experiment must be added there to show up in the summary table and plot.
 - Section 6 refits `lr_pipeline` on the full train set; it is the only place the test set is used.
-- `X_train_scaled`, `X_train_pca`, `X_test_pca` (sections 2.2–2.5) are exploration only; no model consumes them.
+- `X_train_scaled` and the full `pca` (sections 2.2 and 2.4) are exploration only (variance curve, 95 % threshold); no model consumes them, and the test set is not touched before section 6. Inside the CV pipelines, PCA(0.95) keeps 100–101 components depending on the fold, not the 102 found on the full train set.
 
 Methodological invariants to keep: subject-grouped CV (never plain KFold, which leaks subjects and inflates scores), all fitting inside pipelines, test set used once for the final model.
 
