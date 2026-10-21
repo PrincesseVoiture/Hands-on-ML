@@ -1,0 +1,12 @@
+# Dataset (must not be committed — linked in the notebook instead)
+train.csv
+test.csv
+*.zip
+
+# Environment
+.venv/
+__pycache__/
+.ipynb_checkpoints/
+
+# Headless re-runs
+*_run.ipynb
