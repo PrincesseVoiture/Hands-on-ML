@@ -165,7 +165,9 @@ Aucun hyperparamètre n'est réglé. Premier test : le gain est faible, donc le 
 - [ ] **Alléger les répétitions** :
   - « We use the same five-fold subject-aware cross-validation… » revient environ 8 fois : le dire une fois en §3.1 ;
   - « These results suggest that… » revient de nombreuses fois.
-- [ ] **Conclusion** : bien distinguer ce qui a marché, ce qui n'a pas marché et ce que vous feriez avec plus de temps (structure demandée par la consigne).
+- [x] **Conclusion** : bien distinguer ce qui a marché, ce qui n'a pas marché et ce que vous feriez avec plus de temps (structure demandée par la consigne).
+
+  *Fait sur les résultats actuels du notebook (540 variables, avant les étapes 3 et 5 à 10) : §7 réécrite en cinq parties (What we did, What worked, What did not work, Comparison with existing work, If we had more time). Les chiffres viennent des sorties actuelles (LR 93,52 % en validation croisée, 95,42 % sur le test). Le constat principal se lit déjà dans les sorties : à environ 100 dimensions, PCA(≈102) bat SelectKBest(100) pour la LR (92,08 % contre 90,80 %) et le SVM (90,88 % contre 89,20 %), et perd pour la RF (85,27 % contre 89,24 %). La conclusion corrige donc l'idée « la sélection de variables préserve mieux la performance » de §3.6, §4 et §5.1, qui restent à réécrire (étape 5). Autres points tirés des sorties : écarts entre modèles (1,2 et 1,7 pt) inférieurs à l'écart-type entre plis (4,4 à 5,1 pt) ; 73 des 135 erreurs de test entre SITTING et STANDING, et seulement 4 entre activités statiques et dynamiques. Comparaison avec l'existant : 95,42 % contre ≈ 96 % (Anguita) et 95,55 % (Gao), moins de 20 fenêtres de test d'écart, donc résultats jugés équivalents. Le 93,89 % de Gao à 100 variables (section SOTA) n'a pas pu être vérifié (page MDPI inaccessible) : la conclusion ne le cite pas. À reprendre après les étapes 5 à 8 si leurs résultats changent le constat.*
 
 ### Étape 12 : relance finale et mise à jour des chiffres (**en dernier**, ~20 min)
 
