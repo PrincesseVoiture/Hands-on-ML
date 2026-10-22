@@ -42,7 +42,7 @@ L'ordre est choisi pour **éviter de refaire le travail** : d'abord les correcti
   | §2.5 | `obvisously` | `obviously` |
   | §3.1 | `may benefits form` | `may benefit from` |
 
-- [ ] **Membres du groupe** (première cellule) : vérifier que tous les noms y sont. La consigne l'exige.
+- [x] **Membres du groupe** (première cellule) : vérifier que tous les noms y sont. La consigne l'exige. *Liste laissée telle quelle (voir étape 12).*
 - [x] **§2, texte après `train_df.info()`** : la phrase « We also check for constant features. There are none. » arrive avant le code qui fait la vérification. La déplacer après la cellule « Identify constant features ».
 - [x] **§2.1** : « The classes are balanced » contredit « the imbalance is really moderate ». Écrire plutôt « The classes are approximately balanced (13.4 % to 19.1 %) ».
 - [x] **Supprimer la cellule de code vide** à la fin du notebook.
@@ -171,8 +171,8 @@ Aucun hyperparamètre n'est réglé. Premier test : le gain est faible, donc le 
 
 ### Étape 12 : relance finale et mise à jour des chiffres (**en dernier**, ~20 min)
 
-- [ ] **Kernel → Restart Kernel and Run All Cells.**
-- [ ] **Remettre à jour tous les chiffres du texte.** Ils sont actuellement périmés : ils ne correspondent pas aux sorties du code et viennent d'une ancienne version.
+- [x] **Kernel → Restart Kernel and Run All Cells.** *Fait en mode headless (noyau `hands-on-ml`, environ 1 min 25) : toutes les sorties, texte et images, sont identiques à celles du notebook commité, et les numéros d'exécution vont de 1 à 29 dans l'ordre. Le fichier n'a pas été réécrit, puisque la relance n'aurait changé que les horodatages.*
+- [x] **Remettre à jour tous les chiffres du texte.** Ils sont actuellement périmés : ils ne correspondent pas aux sorties du code et viennent d'une ancienne version.
 
   | Mesure | Écrit | Affiché par le code | Où dans le texte |
   |---|---|---|---|
@@ -190,5 +190,7 @@ Aucun hyperparamètre n'est réglé. Premier test : le gain est faible, donc le 
   | Baisse d'accuracy LR avec KBest | « 1 pt » | 1,05 pt | §4.1, §6 Trade-off, SOTA |
 
   La colonne « Affiché par le code » date d'avant la suppression des 21 colonnes dupliquées (étape 4). Avec 540 variables, la relance donne par exemple 93,52 % pour la LR en validation croisée, 92,08 % pour la LR + PCA et 95,42 % sur le test. Ces valeurs changeront de toute façon après les étapes 3 à 6. **Le mieux** est de faire afficher les phrases clés par le code (f-strings avec `:.2%`), ce qui évite ce décalage. Les scores de la LR varient aussi d'environ ±0,1 pt selon la machine (la relance donne 93,45 % en validation croisée et 95,45 % sur le test).
-- [ ] **Vérifier la taille** du notebook (< 10 Mo) et que les noms de tous les membres y sont.
-- [ ] **Préparer les slides en PDF** (recommandées par la consigne) à partir des graphiques finaux.
+
+  *Fait sur l'état actuel (540 variables, étapes 3 et 5 à 10 non faites) : chiffres corrigés en §3.2, §3.6, « Random Forest Results », §4.1, §4.2, §4.3, §5.1, « Performance–Dimensionality Trade-off » et « Comparison with Our Approach » (la conclusion était déjà à jour). Valeurs : LR 93,52 % / 93,40 %, LR + PCA 92,08 % / 91,88 %, SVM 92,29 % / 92,16 %, RF 91,85 % / 91,75 %, RF + PCA 85,27 % / 84,75 %, KBest(200) 92,35 % / 92,14 % (LR), 91,70 % / 91,70 % (SVM), 91,63 % / 91,34 % (RF), test 95,42 % / 95,40 %. Les écarts sont donnés à 0,1 pt près : à deux décimales, l'écart exact (1,43 pt pour la LR + PCA) différait de celui qu'on calcule à partir des pourcentages affichés (93,52 − 92,08 = 1,44). « approximately 102 components » est devenu « 101 or 102 components depending on the fold » (102, 102, 102, 101, 101 selon le pli). Tous les nombres restants du Markdown ont été recontrôlés contre les sorties. Pas fait : les phrases clés générées par f-strings. Les chiffres tapés à la main sont donc à recontrôler si les étapes 3 et 5 à 10 sont faites plus tard. Non vérifié : le 93,89 % de Gao et al. à 100 variables (section SOTA), page MDPI inaccessible.*
+- [x] **Vérifier la taille** du notebook (< 10 Mo) et que les noms de tous les membres y sont. *0,8 Mo. Liste des membres laissée telle quelle, à la demande.*
+- [ ] **Préparer les slides en PDF** (recommandées par la consigne) à partir des graphiques finaux. *Non fait, à la demande.*
