@@ -42,7 +42,7 @@ L'ordre est choisi pour **éviter de refaire le travail** : d'abord les correcti
   | §2.5 | `obvisously` | `obviously` |
   | §3.1 | `may benefits form` | `may benefit from` |
 
-- [ ] **Membres du groupe** (première cellule) : vérifier que tous les noms y sont. La consigne l'exige.
+- [x] **Membres du groupe** (première cellule) : vérifier que tous les noms y sont. La consigne l'exige. *Liste laissée telle quelle (voir étape 12).*
 - [x] **§2, texte après `train_df.info()`** : la phrase « We also check for constant features. There are none. » arrive avant le code qui fait la vérification. La déplacer après la cellule « Identify constant features ».
 - [x] **§2.1** : « The classes are balanced » contredit « the imbalance is really moderate ». Écrire plutôt « The classes are approximately balanced (13.4 % to 19.1 %) ».
 - [x] **Supprimer la cellule de code vide** à la fin du notebook.
@@ -77,16 +77,19 @@ L'ordre est choisi pour **éviter de refaire le travail** : d'abord les correcti
   ```
 
   Pour la RF, appeler avec `n_jobs=1` (la RF est déjà parallélisée en interne, comme dans le code actuel).
-- [ ] **Construire le tableau récapitulatif de §5 à partir de `results`.** Cela supprime le double tableau (§3.5 et §5) et le `"≈102"` codé en dur. Pour la dimension réelle de la PCA, utiliser `pca_95.n_components_`.
+- [ ] **Construire le tableau récapitulatif de §5 à partir de `results`.** Cela supprime le double tableau (§3.5 et §5) et le `"≈102"` codé en dur. Pour la dimension réelle de la PCA, passer `return_estimator=True` à `cross_validate` et lire `est["pca"].n_components_` dans chaque pli : la PCA y garde 101 ou 102 composantes selon le pli, pas 103 (ce chiffre vient de la PCA d'exploration de §2.4, ajustée sur tout le train ; avant la suppression des 21 colonnes dupliquées, c'était 100 ou 101 contre 102).
 - [x] **Afficher l'écart-type dans tous les tableaux** (il manque dans le tableau LR + SelectKBest de §4.1). Fait avec `ddof=1` (division par k − 1), convention annoncée en §3.1.
 - [ ] **Regrouper les imports sklearn** dans la première cellule de code.
-- [ ] **Code mort** : `X_train_pca` et `X_test_pca` (§2.5) ne sont utilisés par aucun modèle. Soit les supprimer, soit garder seulement l'affichage des dimensions en précisant que les pipelines refont la PCA dans chaque pli. Transformer le jeu de test en §2 sème le doute sur une fuite de données.
+- [x] **Code mort** : `X_train_pca` et `X_test_pca` (§2.5) ne sont utilisés par aucun modèle. Soit les supprimer, soit garder seulement l'affichage des dimensions en précisant que les pipelines refont la PCA dans chaque pli. Transformer le jeu de test en §2 sème le doute sur une fuite de données. *Fait : §2.5 supprimée (code et texte), `X_test_scaled` retiré de §2.2, et un paragraphe à la fin de §2.4 explique que cette PCA sert seulement à l'exploration et que les pipelines refont scaler + PCA dans chaque pli. Le jeu de test n'apparaît plus qu'en §6.*
 
 ### Étape 4 : compléter le prétraitement (critère « Preprocessing », ~30 min)
 
-- [ ] **21 colonnes strictement identiques** à d'autres (par exemple `tGravityAccMag-*` = `tBodyAccMag-*`). `train_df.duplicated()` ne teste que les lignes, il faut aussi `X_train.T.duplicated()`. **À décider en groupe :**
+- [x] **21 colonnes strictement identiques** à d'autres (par exemple `tGravityAccMag-*` = `tBodyAccMag-*`). `train_df.duplicated()` ne teste que les lignes, il faut aussi `X_train.T.duplicated()`. **À décider en groupe :**
   - soit les supprimer (recommandé), mais alors tous les « 561 » du texte deviennent **540** ;
   - soit les signaler et justifier pourquoi on les garde.
+
+  *Fait (option « supprimer ») : en §2, après le test des variables constantes, une cellule liste les 21 copies et la variable qu'elles recopient, puis une autre les retire de `X_train` et de `X_test` (colonnes repérées sur le train seulement). Deux familles : les 13 `tGravityAccMag-*` = `tBodyAccMag-*`, et `-sma()` = `-mean()` pour les 8 autres signaux de magnitude (une magnitude est positive, donc la moyenne de sa valeur absolue est sa moyenne). Le texte justifie la suppression (poids doublé dans la PCA, les distances du SVM et le tirage des variables de la RF ; deux places sur k prises dans SelectKBest) et explique pourquoi la faire avant la validation croisée ne crée pas de fuite. Tous les « 561 » qui désignent l'entrée des modèles sont passés à 540, et 64,3 % à 63,0 %. Les « 561 » qui décrivent le dataset (intro, `info()`, Gao et al.) restent. Chiffres de §2 mis à jour : 1 746 paires corrélées sur 145 530 (1,20 %), 103 composantes sur 540 (80,9 %). Le code de §5 lit la dimension avec `X_train.shape[1]`.*
+  - *À dire à l'oral : sur les 561 variables, SelectKBest aurait mis 6 copies dans son top 50, 11 dans le top 100 et 16 dans le top 200.*
 - [ ] **84 noms de colonnes `bandsEnergy`** sont dupliqués dans la source, et pandas leur ajoute `.1`/`.2`. Le mentionner.
 - [ ] **§2.2** : préciser que les auteurs du dataset ont déjà normalisé les variables dans **[-1, 1]**. La standardisation reste utile (moyennes et variances différentes), mais la phrase actuelle est vague.
 - [ ] **Exploration par sujet** : 21 sujets en entraînement, 9 en test, sans recouvrement. Le découpage officiel est déjà fait par sujet, ce qui renforce l'argument de la validation croisée groupée.
@@ -162,12 +165,14 @@ Aucun hyperparamètre n'est réglé. Premier test : le gain est faible, donc le 
 - [ ] **Alléger les répétitions** :
   - « We use the same five-fold subject-aware cross-validation… » revient environ 8 fois : le dire une fois en §3.1 ;
   - « These results suggest that… » revient de nombreuses fois.
-- [ ] **Conclusion** : bien distinguer ce qui a marché, ce qui n'a pas marché et ce que vous feriez avec plus de temps (structure demandée par la consigne).
+- [x] **Conclusion** : bien distinguer ce qui a marché, ce qui n'a pas marché et ce que vous feriez avec plus de temps (structure demandée par la consigne).
+
+  *Fait sur les résultats actuels du notebook (540 variables, avant les étapes 3 et 5 à 10) : §7 réécrite en cinq parties (What we did, What worked, What did not work, Comparison with existing work, If we had more time). Les chiffres viennent des sorties actuelles (LR 93,52 % en validation croisée, 95,42 % sur le test). Le constat principal se lit déjà dans les sorties : à environ 100 dimensions, PCA(≈102) bat SelectKBest(100) pour la LR (92,08 % contre 90,80 %) et le SVM (90,88 % contre 89,20 %), et perd pour la RF (85,27 % contre 89,24 %). La conclusion corrige donc l'idée « la sélection de variables préserve mieux la performance » de §3.6, §4 et §5.1, qui restent à réécrire (étape 5). Autres points tirés des sorties : écarts entre modèles (1,2 et 1,7 pt) inférieurs à l'écart-type entre plis (4,4 à 5,1 pt) ; 73 des 135 erreurs de test entre SITTING et STANDING, et seulement 4 entre activités statiques et dynamiques. Comparaison avec l'existant : 95,42 % contre ≈ 96 % (Anguita) et 95,55 % (Gao), moins de 20 fenêtres de test d'écart, donc résultats jugés équivalents. Le 93,89 % de Gao à 100 variables (section SOTA) n'a pas pu être vérifié (page MDPI inaccessible) : la conclusion ne le cite pas. À reprendre après les étapes 5 à 8 si leurs résultats changent le constat.*
 
 ### Étape 12 : relance finale et mise à jour des chiffres (**en dernier**, ~20 min)
 
-- [ ] **Kernel → Restart Kernel and Run All Cells.**
-- [ ] **Remettre à jour tous les chiffres du texte.** Ils sont actuellement périmés : ils ne correspondent pas aux sorties du code et viennent d'une ancienne version.
+- [x] **Kernel → Restart Kernel and Run All Cells.** *Fait en mode headless (noyau `hands-on-ml`, environ 1 min 25) : toutes les sorties, texte et images, sont identiques à celles du notebook commité, et les numéros d'exécution vont de 1 à 29 dans l'ordre. Le fichier n'a pas été réécrit, puisque la relance n'aurait changé que les horodatages.*
+- [x] **Remettre à jour tous les chiffres du texte.** Ils sont actuellement périmés : ils ne correspondent pas aux sorties du code et viennent d'une ancienne version.
 
   | Mesure | Écrit | Affiché par le code | Où dans le texte |
   |---|---|---|---|
@@ -184,6 +189,8 @@ Aucun hyperparamètre n'est réglé. Premier test : le gain est faible, donc le 
   | LR + KBest(200) F1 macro | 92,23 % | 92,21 % | §4.1 |
   | Baisse d'accuracy LR avec KBest | « 1 pt » | 1,05 pt | §4.1, §6 Trade-off, SOTA |
 
-  Ces valeurs changeront de toute façon après les étapes 3 à 6. **Le mieux** est de faire afficher les phrases clés par le code (f-strings avec `:.2%`), ce qui évite ce décalage. Les scores de la LR varient aussi d'environ ±0,1 pt selon la machine (la relance donne 93,45 % en validation croisée et 95,45 % sur le test).
-- [ ] **Vérifier la taille** du notebook (< 10 Mo) et que les noms de tous les membres y sont.
-- [ ] **Préparer les slides en PDF** (recommandées par la consigne) à partir des graphiques finaux.
+  La colonne « Affiché par le code » date d'avant la suppression des 21 colonnes dupliquées (étape 4). Avec 540 variables, la relance donne par exemple 93,52 % pour la LR en validation croisée, 92,08 % pour la LR + PCA et 95,42 % sur le test. Ces valeurs changeront de toute façon après les étapes 3 à 6. **Le mieux** est de faire afficher les phrases clés par le code (f-strings avec `:.2%`), ce qui évite ce décalage. Les scores de la LR varient aussi d'environ ±0,1 pt selon la machine (la relance donne 93,45 % en validation croisée et 95,45 % sur le test).
+
+  *Fait sur l'état actuel (540 variables, étapes 3 et 5 à 10 non faites) : chiffres corrigés en §3.2, §3.6, « Random Forest Results », §4.1, §4.2, §4.3, §5.1, « Performance–Dimensionality Trade-off » et « Comparison with Our Approach » (la conclusion était déjà à jour). Valeurs : LR 93,52 % / 93,40 %, LR + PCA 92,08 % / 91,88 %, SVM 92,29 % / 92,16 %, RF 91,85 % / 91,75 %, RF + PCA 85,27 % / 84,75 %, KBest(200) 92,35 % / 92,14 % (LR), 91,70 % / 91,70 % (SVM), 91,63 % / 91,34 % (RF), test 95,42 % / 95,40 %. Les écarts sont donnés à 0,1 pt près : à deux décimales, l'écart exact (1,43 pt pour la LR + PCA) différait de celui qu'on calcule à partir des pourcentages affichés (93,52 − 92,08 = 1,44). « approximately 102 components » est devenu « 101 or 102 components depending on the fold » (102, 102, 102, 101, 101 selon le pli). Tous les nombres restants du Markdown ont été recontrôlés contre les sorties. Pas fait : les phrases clés générées par f-strings. Les chiffres tapés à la main sont donc à recontrôler si les étapes 3 et 5 à 10 sont faites plus tard. Non vérifié : le 93,89 % de Gao et al. à 100 variables (section SOTA), page MDPI inaccessible.*
+- [x] **Vérifier la taille** du notebook (< 10 Mo) et que les noms de tous les membres y sont. *0,8 Mo. Liste des membres laissée telle quelle, à la demande.*
+- [ ] **Préparer les slides en PDF** (recommandées par la consigne) à partir des graphiques finaux. *Non fait, à la demande.*
