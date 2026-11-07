@@ -33,8 +33,10 @@ There are no tests or linters. To check one experiment, run its pipeline in a sc
 
 Cells share global state and must run in order:
 - `X_train`/`y_train`/`X_test`/`y_test` (all columns except `Activity` and `subject`, then the 21 duplicated columns dropped in section 2, so models see 540 features), `groups = train_df["subject"]`, `cv = GroupKFold(n_splits=5)`.
-- Every experiment is a `Pipeline` (StandardScaler / PCA / SelectKBest inside it) scored with `cross_validate(..., groups=groups, cv=cv, scoring=["accuracy", "f1_macro"])`. Results go to `{lr,svm,rf}_scores` and `{lr,svm,rf}_pca_scores` (dicts) and `{lr,svm,rf}_fs_df` (DataFrames for k = 50/100/200).
-- Section 5 aggregates them through the `model_results` dict into `comparison_df` (PCA dimension hard-coded as `"≈102"`); a new experiment must be added there to show up in the summary table and plot.
+- All imports (stdlib, pandas, sklearn) live in the first code cell; no other cell imports anything.
+- Every experiment in sections 3 and 4 is a `Pipeline` (StandardScaler / PCA / SelectKBest inside it) run through one `evaluate(name, steps, n_jobs=-1)` helper defined in §3.1, just before `lr_pipeline`: it calls `cross_validate(..., groups=groups, cv=cv, scoring=["accuracy", "f1_macro"], return_estimator=True)`, prints accuracy ± std (`ddof=1`), F1-macro and fit time, and stores `results[name] = {"scores": …, "dimensions": …}`. `dimensions` is read from the fitted pipelines: `named_steps["pca"].n_components_`, `named_steps["selector"].get_support().sum()` (SelectKBest has no `k_`), else 540 — so PCA rows carry the measured `"101-102"`, not a hard-coded value. RF experiments are called with `n_jobs=1` (the forest already parallelizes internally); bare `evaluate(...)` calls end in `;` so the returned dict is not displayed.
+- Section 4 loops over `k_values = [50, 100, 200]` and builds the per-model `{lr,svm,rf}_fs_df` tables with a small `fs_row(scores, k)` helper.
+- Section 5 builds `comparison_df` from `results` and `k_values`; its bar plot filters SelectKBest rows at `Dimensions == 200` (ints there, strings like `"101-102"` on PCA rows). A new experiment shows up in the summary table and plot by calling `evaluate` and being listed in that loop.
 - Section 6 refits `lr_pipeline` on the full train set; it is the only place the test set is used.
 - `X_train_scaled` and the full `pca` (sections 2.2 and 2.4) are exploration only (variance curve, 95 % threshold); no model consumes them, and before section 6 the test set only loses the duplicated columns found on train. Inside the CV pipelines, PCA(0.95) keeps 101–102 components depending on the fold, not the 103 found on the full train set.
 
@@ -43,6 +45,6 @@ Methodological invariants to keep: subject-grouped CV (never plain KFold, which 
 ## Gotchas
 
 - Figures quoted in Markdown cells are typed by hand and drift from the outputs when cells are re-run; after any re-execution, re-check every number in the text against the outputs.
-- The committed notebook has out-of-order execution counts; validate with a fresh top-to-bottom run.
+- The working notebook was just re-run top-to-bottom (execution counts 1–28); keep validating any later edit with a fresh top-to-bottom run.
 - LogisticRegression (lbfgs, default `tol=1e-4`) scores move by about ±0.001 across machines, and even on one machine when the BLAS thread count changes (7/2947 test predictions flip); `tol=1e-8` makes it deterministic. SVC and RF (`random_state=42`) reproduce exactly.
 - Dataset quirks: features are pre-normalized to [-1, 1]; 21 columns are exact duplicates of others (13 `tGravityAccMag-*` = `tBodyAccMag-*`, and `*Mag-sma()` = `*Mag-mean()` for the 8 other magnitude signals), dropped in section 2, so text quoting the model input says 540 while text describing the raw dataset says 561; 84 `bandsEnergy` names are duplicated in the source and get `.1`/`.2` suffixes from pandas; train (21 subjects) and test (9 subjects) are subject-disjoint.

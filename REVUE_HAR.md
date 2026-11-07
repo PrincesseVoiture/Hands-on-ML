@@ -56,7 +56,7 @@ L'ordre est choisi pour **éviter de refaire le travail** : d'abord les correcti
 
 À faire **avant** d'ajouter des expériences : elles en profiteront directement.
 
-- [ ] **Remplacer les 9 blocs `cross_validate` + `print` copiés-collés** par une fonction qui stocke les résultats dans un dictionnaire :
+- [x] **Remplacer les 9 blocs `cross_validate` + `print` copiés-collés** par une fonction qui stocke les résultats dans un dictionnaire :
 
   ```python
   results = {}
@@ -77,9 +77,13 @@ L'ordre est choisi pour **éviter de refaire le travail** : d'abord les correcti
   ```
 
   Pour la RF, appeler avec `n_jobs=1` (la RF est déjà parallélisée en interne, comme dans le code actuel).
-- [ ] **Construire le tableau récapitulatif de §5 à partir de `results`.** Cela supprime le double tableau (§3.5 et §5) et le `"≈102"` codé en dur. Pour la dimension réelle de la PCA, passer `return_estimator=True` à `cross_validate` et lire `est["pca"].n_components_` dans chaque pli : la PCA y garde 101 ou 102 composantes selon le pli, pas 103 (ce chiffre vient de la PCA d'exploration de §2.4, ajustée sur tout le train ; avant la suppression des 21 colonnes dupliquées, c'était 100 ou 101 contre 102).
+
+  *Fait : `evaluate(name, steps, n_jobs=-1)` définie en §3.1, avant `lr_pipeline` ; les 9 blocs sont remplacés par des appels (§3.1, 3.2, 3.3, 3.4, 3.6, 3.7) ou réutilisés dans les boucles de §4. Le dictionnaire `results[name]` stocke `scores` et la dimension réellement vue par le classifieur (lue dans les pipelines ajustés, voir point suivant). L'écart-type est calculé avec `ddof=1`, comme annoncé en §3.1. La RF et le RF + PCA sont appelés avec `n_jobs=1`. §4 ajoute un petit helper `fs_row` pour les trois tableaux.*
+- [x] **Construire le tableau récapitulatif de §5 à partir de `results`.** Cela supprime le double tableau (§3.5 et §5) et le `"≈102"` codé en dur. Pour la dimension réelle de la PCA, passer `return_estimator=True` à `cross_validate` et lire `est["pca"].n_components_` dans chaque pli : la PCA y garde 101 ou 102 composantes selon le pli, pas 103 (ce chiffre vient de la PCA d'exploration de §2.4, ajustée sur tout le train ; avant la suppression des 21 colonnes dupliquées, c'était 100 ou 101 contre 102).
+
+  *Fait : le tableau de §5 est construit en itérant `results` ; le double tableau et son titre « 3.5 Results Logistic regression and SVM » ont été supprimés, et `"≈102"` remplacé par la dimension mesurée : 540, « 101-102 » (via `return_estimator=True` : `named_steps["pca"].n_components_`, et `get_support().sum()` pour SelectKBest, qui n'a pas d'attribut `k_`), ou k pour les lignes SelectKBest. Les titres §3 sont renumérotés : 3.5 « Logistic Regression compared with SVM » (faute « Logestic » corrigée), 3.6 RF Baseline, 3.7 RF with PCA. Le graphique de §5 filtre toujours les lignes SelectKBest à k = 200.*
 - [x] **Afficher l'écart-type dans tous les tableaux** (il manque dans le tableau LR + SelectKBest de §4.1). Fait avec `ddof=1` (division par k − 1), convention annoncée en §3.1.
-- [ ] **Regrouper les imports sklearn** dans la première cellule de code.
+- [x] **Regrouper les imports sklearn** dans la première cellule de code. *Fait : plus qu'un seul bloc d'imports en tête du notebook (les imports de métriques de §6 ont été retirés ; `train_test_split`, inutilisé, supprimé).*
 - [x] **Code mort** : `X_train_pca` et `X_test_pca` (§2.5) ne sont utilisés par aucun modèle. Soit les supprimer, soit garder seulement l'affichage des dimensions en précisant que les pipelines refont la PCA dans chaque pli. Transformer le jeu de test en §2 sème le doute sur une fuite de données. *Fait : §2.5 supprimée (code et texte), `X_test_scaled` retiré de §2.2, et un paragraphe à la fin de §2.4 explique que cette PCA sert seulement à l'exploration et que les pipelines refont scaler + PCA dans chaque pli. Le jeu de test n'apparaît plus qu'en §6.*
 
 ### Étape 4 : compléter le prétraitement (critère « Preprocessing », ~30 min)
