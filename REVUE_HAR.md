@@ -127,12 +127,17 @@ Aucun hyperparamètre n'est réglé. Premier test : le gain est faible, donc le 
 | SVC rbf, C = 10 | 92,43 % |
 | SVM linéaire, C = 0,1 | 93,39 % |
 
-- [ ] **`GridSearchCV(pipeline, param_grid, cv=cv, scoring="f1_macro")`** puis `.fit(X_train, y_train, groups=groups)`, avec les grilles suivantes :
+- [x] **`GridSearchCV(pipeline, param_grid, cv=cv, scoring="f1_macro")`** puis `.fit(X_train, y_train, groups=groups)`, avec les grilles suivantes :
   - LR : `C` ;
   - SVM : `C` et `gamma` ;
   - RF : `max_features` et `n_estimators`.
-- [ ] **Traiter aussi `n_components` (PCA) et `k` (SelectKBest)** comme des hyperparamètres, plutôt que les seuils arbitraires 95 % et 50/100/200.
-- [ ] **Signaler que `best_score_` est légèrement optimiste**, puisqu'il est mesuré sur la même validation croisée que celle qui a servi à choisir. La validation croisée imbriquée est la solution rigoureuse ; au minimum, le mentionner.
+
+  *Fait : §3.1, quatre recherches sur pipeline (LR `C` ; SVM linéaire `C` ; SVM rbf `C` × `gamma` ; RF `n_estimators` × `max_features`), GroupKFold(5) sur les sujets, tableau `tuning_rows`. Valeurs adoptées et utilisées dans tous les pipeline §3–§4 : LR `C=1` (c'était déjà le défaut — tous les chiffres LR inchangés), SVM linéaire `C=0,1`, SVM rbf `C=10, gamma=0,001` (γ=0,01 effondre l'accuracy vers 85 %), RF 500 arbres `max_features="log2"` (≈1 pt de mieux que « sqrt »). Conséquence demandée : les deux noyaux sont comparés partout (§3, §4.2, §5), quatre lignes de modèles dans `comparison_df` et le graphique. Verdict conservé dans le texte : le réglage ajuste les écarts sans renverser le classement.*
+
+- [ ] **Traiter aussi `n_components` (PCA) et `k` (SelectKBest)** comme des hyperparamètres, plutôt que les seuils arbitraires 95 % et 50/100/200. *→ à faire avec la grille commune PCA/SelectKBest de l'étape 5.*
+- [x] **Signaler que `best_score_` est légèrement optimiste**, puisqu'il est mesuré sur la même validation croisée que celle qui a servi à choisir. La validation croisée imbriquée est la solution rigoureuse ; au minimum, le mentionner.
+
+  *Fait : §3.1 annonce l'optimisme ; §3.9 le mesure (nouvelle sous-section, markdown + code). Boucle externe explicite : pour chaque pli GroupKFold(5), `GridSearchCV` interne sur GroupKFold(4) de la partie entraînement seule, réajustement du gagnant puis prédiction sur les sujets du pli externe jamais vus — sklearn 1.9 ne propage pas `groups` dans un `GridSearchCV` passé à `cross_validate`, et `refit=False` n'a pas de `predict`, d'où la boucle à la place du nesting. Résultat : optimisme ≤ 0,13 pt de F1 (0,06 LR ; 0,13 SVM linéaire ; 0,02 SVM rbf ; −0,01 RF), classement inchangé en CV imbriquée (LR 0,9334 > linéaire 0,9303 > rbf 0,9302 > RF 0,9272). Les grilles internes excluent γ=0,01 et `max_features=0,3`, signalé honnêtement dans le texte.*
 
 ### Étape 7 : présenter les résultats honnêtement (critère « Evaluation », ~15 min)
 
