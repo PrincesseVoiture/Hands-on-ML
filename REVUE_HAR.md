@@ -56,7 +56,7 @@ L'ordre est choisi pour **éviter de refaire le travail** : d'abord les correcti
 
 À faire **avant** d'ajouter des expériences : elles en profiteront directement.
 
-- [ ] **Remplacer les 9 blocs `cross_validate` + `print` copiés-collés** par une fonction qui stocke les résultats dans un dictionnaire :
+- [x] **Remplacer les 9 blocs `cross_validate` + `print` copiés-collés** par une fonction qui stocke les résultats dans un dictionnaire :
 
   ```python
   results = {}
@@ -77,9 +77,13 @@ L'ordre est choisi pour **éviter de refaire le travail** : d'abord les correcti
   ```
 
   Pour la RF, appeler avec `n_jobs=1` (la RF est déjà parallélisée en interne, comme dans le code actuel).
-- [ ] **Construire le tableau récapitulatif de §5 à partir de `results`.** Cela supprime le double tableau (§3.5 et §5) et le `"≈102"` codé en dur. Pour la dimension réelle de la PCA, passer `return_estimator=True` à `cross_validate` et lire `est["pca"].n_components_` dans chaque pli : la PCA y garde 101 ou 102 composantes selon le pli, pas 103 (ce chiffre vient de la PCA d'exploration de §2.4, ajustée sur tout le train ; avant la suppression des 21 colonnes dupliquées, c'était 100 ou 101 contre 102).
+
+  *Fait : `evaluate(name, steps, n_jobs=-1)` définie en §3.1, avant `lr_pipeline` ; les 9 blocs sont remplacés par des appels (§3.1, 3.2, 3.3, 3.4, 3.6, 3.7) ou réutilisés dans les boucles de §4. Le dictionnaire `results[name]` stocke `scores` et la dimension réellement vue par le classifieur (lue dans les pipelines ajustés, voir point suivant). L'écart-type est calculé avec `ddof=1`, comme annoncé en §3.1. La RF et le RF + PCA sont appelés avec `n_jobs=1`. §4 ajoute un petit helper `fs_row` pour les trois tableaux.*
+- [x] **Construire le tableau récapitulatif de §5 à partir de `results`.** Cela supprime le double tableau (§3.5 et §5) et le `"≈102"` codé en dur. Pour la dimension réelle de la PCA, passer `return_estimator=True` à `cross_validate` et lire `est["pca"].n_components_` dans chaque pli : la PCA y garde 101 ou 102 composantes selon le pli, pas 103 (ce chiffre vient de la PCA d'exploration de §2.4, ajustée sur tout le train ; avant la suppression des 21 colonnes dupliquées, c'était 100 ou 101 contre 102).
+
+  *Fait : le tableau de §5 est construit en itérant `results` ; le double tableau et son titre « 3.5 Results Logistic regression and SVM » ont été supprimés, et `"≈102"` remplacé par la dimension mesurée : 540, « 101-102 » (via `return_estimator=True` : `named_steps["pca"].n_components_`, et `get_support().sum()` pour SelectKBest, qui n'a pas d'attribut `k_`), ou k pour les lignes SelectKBest. Les titres §3 sont renumérotés : 3.5 « Logistic Regression compared with SVM » (faute « Logestic » corrigée), 3.6 RF Baseline, 3.7 RF with PCA. Le graphique de §5 filtre toujours les lignes SelectKBest à k = 200.*
 - [x] **Afficher l'écart-type dans tous les tableaux** (il manque dans le tableau LR + SelectKBest de §4.1). Fait avec `ddof=1` (division par k − 1), convention annoncée en §3.1.
-- [ ] **Regrouper les imports sklearn** dans la première cellule de code.
+- [x] **Regrouper les imports sklearn** dans la première cellule de code. *Fait : plus qu'un seul bloc d'imports en tête du notebook (les imports de métriques de §6 ont été retirés ; `train_test_split`, inutilisé, supprimé).*
 - [x] **Code mort** : `X_train_pca` et `X_test_pca` (§2.5) ne sont utilisés par aucun modèle. Soit les supprimer, soit garder seulement l'affichage des dimensions en précisant que les pipelines refont la PCA dans chaque pli. Transformer le jeu de test en §2 sème le doute sur une fuite de données. *Fait : §2.5 supprimée (code et texte), `X_test_scaled` retiré de §2.2, et un paragraphe à la fin de §2.4 explique que cette PCA sert seulement à l'exploration et que les pipelines refont scaler + PCA dans chaque pli. Le jeu de test n'apparaît plus qu'en §6.*
 
 ### Étape 4 : compléter le prétraitement (critère « Preprocessing », ~30 min)
@@ -123,12 +127,17 @@ Aucun hyperparamètre n'est réglé. Premier test : le gain est faible, donc le 
 | SVC rbf, C = 10 | 92,43 % |
 | SVM linéaire, C = 0,1 | 93,39 % |
 
-- [ ] **`GridSearchCV(pipeline, param_grid, cv=cv, scoring="f1_macro")`** puis `.fit(X_train, y_train, groups=groups)`, avec les grilles suivantes :
+- [x] **`GridSearchCV(pipeline, param_grid, cv=cv, scoring="f1_macro")`** puis `.fit(X_train, y_train, groups=groups)`, avec les grilles suivantes :
   - LR : `C` ;
   - SVM : `C` et `gamma` ;
   - RF : `max_features` et `n_estimators`.
-- [ ] **Traiter aussi `n_components` (PCA) et `k` (SelectKBest)** comme des hyperparamètres, plutôt que les seuils arbitraires 95 % et 50/100/200.
-- [ ] **Signaler que `best_score_` est légèrement optimiste**, puisqu'il est mesuré sur la même validation croisée que celle qui a servi à choisir. La validation croisée imbriquée est la solution rigoureuse ; au minimum, le mentionner.
+
+  *Fait : §3.1, quatre recherches sur pipeline (LR `C` ; SVM linéaire `C` ; SVM rbf `C` × `gamma` ; RF `n_estimators` × `max_features`), GroupKFold(5) sur les sujets, tableau `tuning_rows`. Valeurs adoptées et utilisées dans tous les pipeline §3–§4 : LR `C=1` (c'était déjà le défaut — tous les chiffres LR inchangés), SVM linéaire `C=0,1`, SVM rbf `C=10, gamma=0,001` (γ=0,01 effondre l'accuracy vers 85 %), RF 500 arbres `max_features="log2"` (≈1 pt de mieux que « sqrt »). Conséquence demandée : les deux noyaux sont comparés partout (§3, §4.2, §5), quatre lignes de modèles dans `comparison_df` et le graphique. Verdict conservé dans le texte : le réglage ajuste les écarts sans renverser le classement.*
+
+- [ ] **Traiter aussi `n_components` (PCA) et `k` (SelectKBest)** comme des hyperparamètres, plutôt que les seuils arbitraires 95 % et 50/100/200. *→ à faire avec la grille commune PCA/SelectKBest de l'étape 5.*
+- [x] **Signaler que `best_score_` est légèrement optimiste**, puisqu'il est mesuré sur la même validation croisée que celle qui a servi à choisir. La validation croisée imbriquée est la solution rigoureuse ; au minimum, le mentionner.
+
+  *Fait : §3.1 annonce l'optimisme ; §3.9 le mesure (nouvelle sous-section, markdown + code). Boucle externe explicite : pour chaque pli GroupKFold(5), `GridSearchCV` interne sur GroupKFold(4) de la partie entraînement seule, réajustement du gagnant puis prédiction sur les sujets du pli externe jamais vus — sklearn 1.9 ne propage pas `groups` dans un `GridSearchCV` passé à `cross_validate`, et `refit=False` n'a pas de `predict`, d'où la boucle à la place du nesting. Résultat : optimisme ≤ 0,13 pt de F1 (0,06 LR ; 0,13 SVM linéaire ; 0,02 SVM rbf ; −0,01 RF), classement inchangé en CV imbriquée (LR 0,9334 > linéaire 0,9303 > rbf 0,9302 > RF 0,9272). Les grilles internes excluent γ=0,01 et `max_features=0,3`, signalé honnêtement dans le texte.*
 
 ### Étape 7 : présenter les résultats honnêtement (critère « Evaluation », ~15 min)
 
